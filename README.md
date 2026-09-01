@@ -24,7 +24,12 @@ docker run --gpus all --rm -p 8000:8000 \
 
 ## Tags
 
-Images are built from `main` on every push and tagged with:
+Images are built only when `Dockerfile` or `pyproject.toml` change on a
+push/PR to `main` — the two files that actually affect image contents.
+A GitHub Actions version bump (or a README/Dependabot-config edit) doesn't
+touch either, so it no longer triggers a build. Trigger one manually from
+the Actions tab (`workflow_dispatch`) if you need to rebuild without
+touching those files. Published images are tagged with:
 - a CalVer month (`YYYY.MM`, e.g. `2026.09`) — the month it was built; a second push in the same month overwrites this tag, but `latest` and the sha tag still disambiguate which build is newest
 - `latest`
 - the short commit SHA

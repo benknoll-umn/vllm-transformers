@@ -3,8 +3,11 @@ name: Build and publish image
 on:
   push:
     branches: ["main"]
+    paths: ["Dockerfile", "pyproject.toml"]
   pull_request:
     branches: ["main"]
+    paths: ["Dockerfile", "pyproject.toml"]
+  workflow_dispatch: {}
 
 permissions:
   contents: read
