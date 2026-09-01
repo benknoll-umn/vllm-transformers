@@ -37,7 +37,9 @@ GitHub-hosted runners have no GPU) but never push.
 [Dependabot](.github/dependabot.yml) opens weekly PRs for three things:
 the pinned base image tag in the `Dockerfile`, the pinned Python
 dependencies in `pyproject.toml`, and the GitHub Actions versions in the
-workflow itself.
+workflow itself. Each ecosystem is grouped, so if several dependencies in
+the same ecosystem have updates on the same run, they land in one PR
+instead of one per dependency.
 
 ## Versioning note
 
