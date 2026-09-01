@@ -28,6 +28,7 @@ Images are built from `main` on every push and tagged with:
 - a CalVer date (`YYYY.MM.DD`, e.g. `2026.09.01`) — the day it was built
 - `latest`
 - the short commit SHA
+- `vllm<version>-transformers<version>` (e.g. `vllm0.28.0-transformers5.16.1`) — the actual versions installed inside that image, read back from the running container after build
 
 Pull requests build and smoke-test the image (import check only, since
 GitHub-hosted runners have no GPU) but never push.

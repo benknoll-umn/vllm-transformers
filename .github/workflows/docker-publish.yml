@@ -62,7 +62,25 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Smoke test image
+      - name: Smoke test image and capture versions
+        id: versions
         run: |
-          docker run --rm "${{ fromJSON(steps.meta.outputs.json).tags[0] }}" \
-            python -c "import torch, vllm, transformers; print('torch', torch.__version__); print('vllm', vllm.__version__); print('transformers', transformers.__version__)"
+          out=$(docker run --rm "${{ fromJSON(steps.meta.outputs.json).tags[0] }}" \
+            python -c "
+import torch, vllm, transformers
+print(f'torch={torch.__version__}')
+print(f'vllm={vllm.__version__}')
+print(f'transformers={transformers.__version__}')
+")
+          echo "$out"
+          # Sanitize into valid Docker tag characters (e.g. a '+local' build
+          # suffix isn't legal in a tag) before exposing as step outputs.
+          echo "$out" | sed -E 's/[^A-Za-z0-9=_.-]/-/g' >> "$GITHUB_OUTPUT"
+
+      - name: Tag and push version-labeled image
+        if: github.event_name != 'pull_request'
+        run: |
+          src="${{ fromJSON(steps.meta.outputs.json).tags[0] }}"
+          tag="${{ env.IMAGE }}:vllm${{ steps.versions.outputs.vllm }}-transformers${{ steps.versions.outputs.transformers }}"
+          docker tag "$src" "$tag"
+          docker push "$tag"
