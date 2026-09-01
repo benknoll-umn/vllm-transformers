@@ -23,11 +23,12 @@ jobs:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Patch-only: update-type reflects the highest semver bump in the PR,
-      # including grouped multi-dependency PRs (see .github/dependabot.yml
-      # groups). Anything minor/major still needs a manual look and merge.
-      - name: Enable auto-merge for patch updates
-        if: steps.metadata.outputs.update-type == 'version-update:semver-patch'
+      # Every Dependabot PR auto-merges regardless of update size (patch,
+      # minor, or major) -- no update-type gate. This image isn't deployed
+      # from this repo directly: consumers pull a tag, test it for their
+      # purpose, and copy it into the secure HPC environment only if it's
+      # needed, so a bad bump doesn't ship anywhere on its own.
+      - name: Enable auto-merge
         run: gh pr merge --auto --merge "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}

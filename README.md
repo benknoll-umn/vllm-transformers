@@ -24,7 +24,12 @@ docker run --gpus all --rm -p 8000:8000 \
 
 ## Tags
 
-Images are built from `main` on every push and tagged with:
+Images are built only when `Dockerfile` or `pyproject.toml` change on a
+push/PR to `main` — the two files that actually affect image contents.
+A GitHub Actions version bump (or a README/Dependabot-config edit) doesn't
+touch either, so it no longer triggers a build. Trigger one manually from
+the Actions tab (`workflow_dispatch`) if you need to rebuild without
+touching those files. Published images are tagged with:
 - a CalVer month (`YYYY.MM`, e.g. `2026.09`) — the month it was built; a second push in the same month overwrites this tag, but `latest` and the sha tag still disambiguate which build is newest
 - `latest`
 - the short commit SHA
@@ -42,12 +47,15 @@ workflow itself. Each ecosystem is grouped, so if several dependencies in
 the same ecosystem have updates in the same run, they land in one PR
 instead of one per dependency.
 
-[A workflow](.github/workflows/dependabot-auto-merge.yml) auto-approves
-every Dependabot PR and auto-merges it if the highest version bump in the
-PR is patch-level ([GitHub's documented pattern](https://docs.github.com/en/code-security/tutorials/secure-your-dependencies/automate-dependabot-with-actions)).
-Minor/major bumps are approved but left for a manual merge. This relies on
-the repo's "Allow auto-merge" setting being enabled; it does **not** set up
-branch protection/required status checks, so a merge can land before the
+[A workflow](.github/workflows/dependabot-auto-merge.yml) auto-approves and
+auto-merges every Dependabot PR, regardless of update size — patch, minor,
+or major ([GitHub's documented pattern](https://docs.github.com/en/code-security/tutorials/secure-your-dependencies/automate-dependabot-with-actions),
+with the update-type gate removed). This image isn't deployed from this
+repo directly: consumers pull a tag, test it for their purpose, and copy it
+into the secure HPC environment only if it's needed, so an unattended merge
+here doesn't ship a bad bump anywhere on its own. This relies on the repo's
+"Allow auto-merge" setting being enabled; it does **not** set up branch
+protection/required status checks, so a merge can land before the
 `docker-publish` workflow finishes — add that separately if you want the
 build to gate the merge.
 
