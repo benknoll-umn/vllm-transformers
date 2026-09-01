@@ -52,7 +52,11 @@ jobs:
           context: .
           platforms: linux/amd64
           push: ${{ github.event_name != 'pull_request' }}
-          load: ${{ github.event_name == 'pull_request' }}
+          # Always load into the runner's local Docker daemon (single
+          # platform, so push+load together are fine) -- otherwise the
+          # smoke-test step below has to re-pull the image it just pushed,
+          # which is wasteful and flaky against registry rate limits.
+          load: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
