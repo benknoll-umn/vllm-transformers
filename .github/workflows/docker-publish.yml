@@ -69,8 +69,12 @@ jobs:
       - name: Smoke test image and capture versions
         id: versions
         run: |
-          out=$(docker run --rm -e VLLM_TARGET_DEVICE=cpu "${{ fromJSON(steps.meta.outputs.json).tags[0] }}" \
-            python -c "import torch, vllm, transformers; print(f'torch={torch.__version__}'); print(f'vllm={vllm.__version__}'); print(f'transformers={transformers.__version__}')")
+          # The base image's ENTRYPOINT is the `vllm` CLI itself, so without
+          # --entrypoint here "python -c ..." is appended as arguments to
+          # `vllm serve` instead of actually running python.
+          out=$(docker run --rm -e VLLM_TARGET_DEVICE=cpu --entrypoint python \
+            "${{ fromJSON(steps.meta.outputs.json).tags[0] }}" \
+            -c "import torch, vllm, transformers; print(f'torch={torch.__version__}'); print(f'vllm={vllm.__version__}'); print(f'transformers={transformers.__version__}')")
           echo "$out"
           # Sanitize into valid Docker tag characters (e.g. a '+local' build
           # suffix isn't legal in a tag) before exposing as step outputs.
