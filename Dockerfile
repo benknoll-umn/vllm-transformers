@@ -10,7 +10,7 @@
 # Dependabot bumps this tag automatically (see .github/dependabot.yml) --
 # the tag must stay a literal value on this line (no ARG indirection) for
 # Dependabot's docker updater to find and update it.
-FROM vllm/vllm-openai:v0.28.0-cu129
+FROM vllm/vllm-openai:v0.30.0-cu129
 
 COPY pyproject.toml /tmp/build/pyproject.toml
 RUN pip install --no-cache-dir uv \
